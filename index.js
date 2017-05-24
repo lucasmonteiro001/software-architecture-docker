@@ -24,20 +24,22 @@ const getFiles = new Promise((resolve) => {
     resolve(files);
 });
 
+const getYamlObjectFromFile = file => {
+    return readFileSync(`${dockerFilesFolder}/${file}`)
+        .then((fileContent) => {
+            return YAML.parse(fileContent);
+        })
+        .catch(err => console.warn(err));
+
+};
+
 
 getFiles
     .then(files => {
+        let promises = files.map(getYamlObjectFromFile);
 
-        let yamlObjects = [];
-
-        files.map(file => {
-            readFileSync(`${dockerFilesFolder}/${file}`)
-                .then((fileContent) => {
-                    // console.log(YAML.parse(fileContent))
-                    yamlObjects.push(YAML.parse(fileContent));
-                    console.log(fileContent)
-                })
-                .catch(err => console.warn(err));
-        });
+        Promise.all(promises).then(yamlObjects => {
+            console.log(yamlObjects.length)
+        })
 
     })
