@@ -27,7 +27,7 @@ const getFiles = new Promise((resolve) => {
 const getYamlObjectFromFile = file => {
     return readFileSync(`${dockerFilesFolder}/${file}`)
         .then((fileContent) => {
-            return YAML.parse(fileContent);
+            return {file, yaml: YAML.parse(fileContent)};
         })
         .catch(err => console.warn(err));
 
@@ -39,7 +39,7 @@ getFiles
         let promises = files.map(getYamlObjectFromFile);
 
         Promise.all(promises).then(yamlObjects => {
-            console.log(yamlObjects.length)
+            console.log(yamlObjects)
         })
 
     })
