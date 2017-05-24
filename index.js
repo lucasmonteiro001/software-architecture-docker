@@ -1,45 +1,47 @@
-const fs = require('fs');
-const YAML = require("yamljs");
+const getAllFiles = require('./filesHelper');
 
-const dockerFilesFolder = './docker-compose';
+/**
+ * Given an object, returns the length of its key or 0 if none
+ * @param object
+ */
+const getObjectLength = (object) => object ? Object.keys(object).length : 0;
 
-const readFileSync = (file) =>
-    new Promise((resolve, reject) => {
-        fs.readFile(file, 'utf8', function (err, data) {
-            if (err) {
-                reject(err);
-            }
-            resolve(data);
-        });
-    });
+const getMetric = (service, metric) => service[metric] ? service[metric].length : 0;
 
-const getFiles = new Promise((resolve) => {
+const extractMetrics = (yamlObject) => {
 
-    let files = [];
+    let metrics = {};
+    let {file, yaml} = yamlObject;
+    let services = yaml.services;
+    let networks = yaml.networks;
 
-    fs.readdirSync(dockerFilesFolder).forEach(function (file) {
-        files.push(file);
-    });
+    // Get metrics only for files with "services"
+    if(services) {
 
-    resolve(files);
-});
+        metrics.version = parseFloat(yaml.version);
+        metrics.numberOfServices = getObjectLength(services);
+        metrics.numberOfNetworks = getObjectLength(networks);
+        metrics.dependsOn = [];
+        metrics.ports = [];
+        metrics.volumes = [];
 
-const getYamlObjectFromFile = file => {
-    return readFileSync(`${dockerFilesFolder}/${file}`)
-        .then((fileContent) => {
-            return {file, yaml: YAML.parse(fileContent)};
-        })
-        .catch(err => console.warn(err));
+        // Extract metrics for each service
+        for(serviceKey in services) {
+            let service = services[serviceKey];
+            metrics.dependsOn.push(getMetric(service, 'depends_on'));
+            metrics.ports.push(getMetric(service, 'ports'));
+            metrics.volumes.push(getMetric(service, 'volumes'));
+        }
+
+        return metrics;
+    }
 
 };
 
+getAllFiles.then(files => {
 
-getFiles
-    .then(files => {
-        let promises = files.map(getYamlObjectFromFile);
+    // Extract metrics for files
+    let metricsPerFile = files.map(extractMetrics).filter(d => !!d);
 
-        Promise.all(promises).then(yamlObjects => {
-            console.log(yamlObjects)
-        })
-
-    })
+    console.log(metricsPerFile)
+});
