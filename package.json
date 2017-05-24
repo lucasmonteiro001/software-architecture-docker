@@ -19,5 +19,6 @@
   "homepage": "https://github.com/lucasmonteiro001/software-architecture-docker#readme",
   "dependencies": {
     "yamljs": "^0.2.10"
-  }
+  },
+  "devDependencies": {}
 }
