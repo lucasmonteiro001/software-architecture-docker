@@ -16,6 +16,11 @@ const getTotal = (obj) => {
     return cont;
 };
 
+/**
+ * Given a yaml object, extract its metrics
+ * @param yamlObject
+ * @return {{}}
+ */
 const extractMetrics = (yamlObject) => {
 
     let metrics = {};
@@ -47,11 +52,12 @@ const extractMetrics = (yamlObject) => {
 
 };
 
-getAllFiles.then(files => {
-
-    // Extract metrics for files
-    let metricsPerFile = files.map(extractMetrics).filter(d => !!d);
-
+/**
+ * Calculate general metrics
+ * @param metricsPerFile
+ * @return {{serv_dependsOn: ({}|*|Array), serv_dependsOnTotal, file_numberOfNetworks: (*|{}), file_numberOfNetworksTotal, file_numberOfServices: ({}|*), file_numberOfServicesTotal, serv_ports: ({}|*|Array), serv_portsTotal, file_version: (Number|*|{}), file_versionTotal, serv_volumes: ({}|*|Array), serv_volumesTotal}}
+ */
+const extractGeneralMetrics = (metricsPerFile) => {
     // Extract general metrics
     let metrics = {};
 
@@ -143,5 +149,15 @@ getAllFiles.then(files => {
         serv_volumesTotal: getTotal(metrics.volumes),
     };
 
-    console.log(finalMetrics)
+    return finalMetrics;
+};
+
+getAllFiles.then(files => {
+
+    // Extract metrics for files, filter for only not undefined elements
+    let metricsPerFile = files.map(extractMetrics).filter(d => !!d);
+
+    let generalMetrics = extractGeneralMetrics(metricsPerFile);
+
+    console.log(generalMetrics)
 });
