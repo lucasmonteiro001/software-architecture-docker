@@ -9,9 +9,10 @@ const getObjectLength = (object) => object ? Object.keys(object).length : 0;
 const getMetric = (service, metric) => service[metric] ? service[metric].length : 0;
 
 const getTotal = (obj) => {
+    // console.log(obj)
     let cont = 0;
     for (let key in obj) {
-        cont += obj[key];
+        cont += obj[key] * key;
     }
     return cont;
 };
@@ -85,9 +86,9 @@ const extractGeneralMetrics = (metricsPerFile) => {
          * Em relação ao arquivo
          */
         if (metrics.numberOfServices[fileMetric.numberOfServices]) {
-            metrics.numberOfServices[fileMetric.numberOfServices] += fileMetric.numberOfServices;
+            metrics.numberOfServices[fileMetric.numberOfServices] += 1;
         } else {
-            metrics.numberOfServices[fileMetric.numberOfServices] = fileMetric.numberOfServices;
+            metrics.numberOfServices[fileMetric.numberOfServices] = 1;
         }
         /**
          * Em relação ao arquivo
